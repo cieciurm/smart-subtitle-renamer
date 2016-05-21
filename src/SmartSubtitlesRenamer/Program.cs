@@ -1,15 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SmartSubtitlesRenamer
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
+            var filesProvider = new FilesInCurrentDirectoryProvider();
+            var consoleLogger = new ConsoleLogger();
+            var subtitleRenamer = new SubtitleRenamer(filesProvider, consoleLogger);
+
+            consoleLogger.LogStart(Directory.GetCurrentDirectory());
+
+            var files = filesProvider.GetFiles();
+
+            var allSplitted = files.Select(FileNameAndExtensionsSplitter.Split);
+
+            foreach (var splitted in allSplitted.Where(x => x.Extension.IsMediaExtension()))
+            {
+                subtitleRenamer.RenameCorrespondingSubtitle(splitted, allSplitted);
+            }
+
+            consoleLogger.LogEnd();
         }
     }
 }
